@@ -10,6 +10,23 @@ function compileSQL(query) {
       index++;
       switch (words[index].toLowerCase()) {
         case "top":
+          index++;
+          if (!isNaN(parseInt(words[index]))) {
+            index++;
+            while (words[index].slice(-1) === ",") {
+              index++;
+            }
+            if (
+              words[index + 1].toLowerCase() === "from" &&
+              words[index + 3] === undefined
+            ) {
+              console.log("Pass", words);
+            } else {
+              console.log("Invalid query type");
+            }
+          } else {
+            console.log("Invalid query type");
+          }
           break;
         case "distinct":
           break;
@@ -59,5 +76,5 @@ function compileSQL(query) {
   }
 }
 const sqlQuery =
-  "SELECT Column1, Column2, Column3, Column4, Column5, Column6 FROM TableName;";
+  "SELECT TOP 3 Column1, Column2, Column3, Column4, Column5, Column6 FROM TableName;";
 compileSQL(sqlQuery);
