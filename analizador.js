@@ -13,43 +13,18 @@ function compileSQL(query) {
           index++;
           if (!isNaN(parseInt(words[index]))) {
             index++;
-            while (words[index].slice(-1) === ",") {
-              index++;
-            }
-            if (
-              words[index + 1].toLowerCase() === "from" &&
-              words[index + 3] === undefined
-            ) {
-              console.log("Pass", words);
-            } else {
-              console.log("Invalid query type");
-            }
+            selectVerifier(words, index);
           } else {
             console.log("Invalid query type");
           }
           break;
         case "distinct":
-          break;
-        case "order":
-          break;
-        case "group":
-          break;
-        case "having":
-          break;
-        case "into":
+          index++;
+          console.log(words[index]);
+          selectVerifier(words, index);
           break;
         default:
-          while (words[index].slice(-1) === ",") {
-            index++;
-          }
-          if (
-            words[index + 1].toLowerCase() === "from" &&
-            words[index + 3] === undefined
-          ) {
-            console.log("Pass", words);
-          } else {
-            console.log("Invalid query type");
-          }
+          selectVerifier(words, index);
           break;
       }
 
@@ -75,6 +50,62 @@ function compileSQL(query) {
       break;
   }
 }
-const sqlQuery =
-  "SELECT TOP 3 Column1, Column2, Column3, Column4, Column5, Column6 FROM TableName;";
+
+function selectVerifier(words, index) {
+  while (words[index].slice(-1) === ",") {
+    index++;
+  }
+  if (words[index + 1].toLowerCase() === "from") {
+    if (words[index + 3] === undefined) {
+      console.log("Pass", words);
+    } else {
+      index = index + 3;
+      switch (words[index].toLowerCase()) {
+        case "where":
+          index = index + 2;
+          condition(words, index);
+          break;
+        case "group":
+          selectBys(words, index);
+          break;
+        case "order":
+          selectBys(words, index);
+          break;
+        default:
+          console.log("Invalid query type");
+          break;
+      }
+    }
+  } else {
+    console.log("Invalid query type");
+  }
+}
+
+function selectBys(words, index) {
+  if (words[index + 1].toLowerCase() === "by") {
+    index = index + 2;
+    while (words[index].slice(-1) === ",") {
+      index++;
+    }
+    if (words[index + 1] === undefined) {
+      console.log("Pass", words);
+    } else {
+      console.log("Invalid query type");
+    }
+  }
+}
+
+function condition(words, index) {
+  if (
+    ["=", ">", "<", ">=", "<=", "<>", "!="].includes(words[index]) &&
+    words[index + 2] === undefined &&
+    words[index + 1] !== undefined
+  ) {
+    console.log("Pass", words);
+  } else {
+    console.log("Invalid query type");
+  }
+}
+
+const sqlQuery = "SELECT Column1, Column2, Column3 FROM TableName WHERE XD = 1";
 compileSQL(sqlQuery);
