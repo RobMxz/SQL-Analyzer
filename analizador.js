@@ -30,6 +30,18 @@ function compileSQL(query) {
 
       break;
     case "insert":
+      index++;
+      if (words[index].toLowerCase() === "into") {
+        index = index + 2;
+        let numberColumns = 0;
+        if (insertVerifier(words, index, numberColumns)) {
+          console.log("Pass", words);
+        } else {
+          console.log("Invalid query type");
+        }
+      } else {
+        console.log("Invalid query type");
+      }
       break;
     case "update":
       break;
@@ -107,5 +119,64 @@ function condition(words, index) {
   }
 }
 
-const sqlQuery = "SELECT Column1, Column2, Column3 FROM TableName WHERE XD = 1";
+function insertVerifier(words, index, numberColumns) {
+  let validator = false;
+  if (words[index][0] === "(") {
+    if (words[index].slice(-1) === ")") {
+      index++;
+      numberColumns++;
+    } else {
+      if (words[index].slice(-1) === ",") {
+        index++;
+        numberColumns++;
+        while (words[index].slice(-1) !== ")") {
+          index++;
+          numberColumns++;
+        }
+        index++;
+        numberColumns++;
+      }
+    }
+    if (words[index].toLowerCase() === "values") {
+      index++;
+      if (words[index][0] === "(") {
+        let numberValues = 0;
+        while (
+          words[index].slice(-1) !== ")" &&
+          words[index + 1] !== undefined
+        ) {
+          numberValues++;
+          index++;
+        }
+        numberValues++;
+        if (numberColumns === numberValues) {
+          validator = true;
+        }
+      }
+    }
+  } else if (words[index].toLowerCase() === "values") {
+    index++;
+    if (words[index][0] === "(") {
+      index++;
+      while (
+        words[index] !== undefined &&
+        words[index].slice(-1) !== ")" &&
+        words[index].slice(-1) !== ";" &&
+        words[index + 1] !== undefined
+      ) {
+        index++;
+      }
+      if (index === words.length - 1) {
+        validator = true;
+      }
+    }
+  }
+  return validator;
+}
+
+const sqlQuery =
+  "INSERT INTO dwdwdw VALUES (value1, value2, value3, value4, ...);";
 compileSQL(sqlQuery);
+compileSQL(
+  "INSERT INTO table_name (column1, column2, column3, ...) VALUES (value1, value2, value3, ...);"
+);
