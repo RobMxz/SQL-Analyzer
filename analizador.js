@@ -46,6 +46,17 @@ function compileSQL(query) {
     case "update":
       break;
     case "delete":
+      index++;
+      if (words[index].toLowerCase() === "from") {
+        index = index + 2;
+        if (words[index].toLowerCase() === "where") {
+          index = index + 2;
+          condition(words, index);
+        }
+      } else {
+        console.log("Invalid query type");
+      }
+
       break;
     case "create":
       break;
@@ -174,9 +185,5 @@ function insertVerifier(words, index, numberColumns) {
   return validator;
 }
 
-const sqlQuery =
-  "INSERT INTO dwdwdw VALUES (value1, value2, value3, value4, ...);";
+const sqlQuery = "DELETE FROM Customers WHERE CustomerName = 'Alfreds';";
 compileSQL(sqlQuery);
-compileSQL(
-  "INSERT INTO table_name (column1, column2, column3, ...) VALUES (value1, value2, value3, ...);"
-);
