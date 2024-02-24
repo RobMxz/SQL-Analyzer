@@ -132,6 +132,12 @@ function compileSQL(query) {
       }
       break;
     case "use":
+      index++;
+      if (words[index + 1] === undefined) {
+        console.log("Pass", words);
+      } else {
+        console.log("Invalid query type");
+      }
       break;
     default:
       console.log("Invalid query type");
@@ -250,5 +256,5 @@ function insertVerifier(words, index, numberColumns) {
   return validator;
 }
 
-const sqlQuery = "TRUNCATE TABLE Categories;";
+const sqlQuery = "USE DATABASE;";
 compileSQL(sqlQuery);
