@@ -78,6 +78,36 @@ function compileSQL(query) {
 
       break;
     case "create":
+      index++;
+      if (words[index].toLowerCase() === "table") {
+        index = index + 2;
+        if (words[index][0] === "(") {
+          if (
+            words[index].slice(-2) === ");" ||
+            words[index].slice(-1) === ")"
+          ) {
+            console.log("Pass", words);
+          } else {
+            index++;
+            if (words[index] && words[index].slice(-1) === ",") {
+              while (
+                words[index + 2] &&
+                (words[index + 2].slice(-2) !== ");" ||
+                  words[index + 2].slice(-1) !== ")")
+              ) {
+                index = index + 2;
+              }
+              if (words[index + 1] === undefined) {
+                console.log("Pass", words);
+              } else {
+                console.log("Invalid query type");
+              }
+            }
+          }
+        }
+      } else {
+        console.log("Invalid query type");
+      }
       break;
     case "drop":
       break;
@@ -205,5 +235,5 @@ function insertVerifier(words, index, numberColumns) {
 }
 
 const sqlQuery =
-  "UPDATE table_name SET column1 = value1, column2 = value2, column3 = value3, column4 = value4 WHERE value = 'condition';";
+  "CREATE TABLE table_name (column1 datatype1, column2 datatype2, column3 datatype3);";
 compileSQL(sqlQuery);
