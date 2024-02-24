@@ -44,6 +44,25 @@ function compileSQL(query) {
       }
       break;
     case "update":
+      index++;
+      if (words[index + 1].toLowerCase() === "set") {
+        index = index + 3;
+        do {
+          if (words[index] === "=") {
+            index = index + 3;
+            if (words[index] === undefined) {
+              console.log("Invalid query type");
+            }
+          }
+        } while (words[index + 1].slice(-1) === ",");
+        index = index + 2;
+        if (words[index].toLowerCase() === "where") {
+          index = index + 2;
+          condition(words, index);
+        }
+      } else {
+        console.log("Invalid query type");
+      }
       break;
     case "delete":
       index++;
@@ -185,5 +204,6 @@ function insertVerifier(words, index, numberColumns) {
   return validator;
 }
 
-const sqlQuery = "DELETE FROM Customers WHERE CustomerName = 'Alfreds';";
+const sqlQuery =
+  "UPDATE table_name SET column1 = value1, column2 = value2, column3 = value3, column4 = value4 WHERE value = 'condition';";
 compileSQL(sqlQuery);
