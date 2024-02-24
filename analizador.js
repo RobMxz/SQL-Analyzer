@@ -120,9 +120,16 @@ function compileSQL(query) {
         }
       }
       break;
-    case "alter":
-      break;
     case "truncate":
+      index++;
+      if (words[index].toLowerCase() === "table") {
+        index = index + 2;
+        if (words[index] === undefined) {
+          console.log("Pass", words);
+        } else {
+          console.log("Invalid query type");
+        }
+      }
       break;
     case "use":
       break;
@@ -243,5 +250,5 @@ function insertVerifier(words, index, numberColumns) {
   return validator;
 }
 
-const sqlQuery = "DROP TABLE table_name;";
+const sqlQuery = "TRUNCATE TABLE Categories;";
 compileSQL(sqlQuery);
