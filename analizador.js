@@ -186,6 +186,8 @@ function selectBys(words, index) {
     } else {
       console.log("Invalid query type");
     }
+  } else {
+    console.log("Invalid query type");
   }
 }
 
