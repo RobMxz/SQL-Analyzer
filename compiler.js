@@ -57,7 +57,7 @@ tables.forEach((element) => {
     tableNames.push([element[0].slice(0, 2), element[1]]);
   }
 });
-const query = "SELECT Codigo FROM ALUMNOS";
+const query = "SELECT Codigo, Nombre FROM UBIGEO";
 
 function selectSQL(query) {
   query = query.toUpperCase();
@@ -81,6 +81,38 @@ function selectSQL(query) {
         );
         console.log(filteredData);
       } else {
+        console.log(query.slice(1, indexFrom).join("").split(","));
+        const columns = query.slice(1, indexFrom).join("").split(",");
+        for (const column of columns) {
+          let indexColumn = -1;
+          console.log("\n", column, "\n");
+          tables.forEach((element) => {
+            if (element[1] === query[indexFrom + 1]) {
+              indexColumn = tables.indexOf(element) * -1;
+            }
+
+            if (
+              element[0].slice(0, 2) === tableNames[indexFromQuery][0] &&
+              element[1].toUpperCase() === column
+            ) {
+              indexColumn += tables.indexOf(element);
+              //console.log(indexColumn);
+            }
+          });
+          if (indexColumn != -1) {
+            //console.log(indexColumn);
+            data.forEach((element) => {
+              if (element[0] === tableNames[indexFromQuery][0]) {
+                console.log(element[indexColumn]);
+              }
+            });
+          } else {
+            console.log("Invalid query type");
+          }
+        }
+        /*
+        
+
         //console.log(tableNames[indexFromQuery][0]);
         //console.log(tables[indexFromQuery][0]);
         let indexColumn = -1;
@@ -107,12 +139,8 @@ function selectSQL(query) {
           });
         } else {
           console.log("Invalid query type");
-        }
+        }*/
       }
-
-      /*else {
-        console.log("Perhaps another query");
-      }*/
     }
     //console.log(tableNames[indexFromQuery][0]);
   }
