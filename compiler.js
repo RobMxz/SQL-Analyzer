@@ -57,7 +57,7 @@ tables.forEach((element) => {
     tableNames.push([element[0].slice(0, 2), element[1]]);
   }
 });
-const query = "SELECT * FROM UBIGEO";
+const query = "SELECT Codigo FROM ALUMNOS";
 
 function selectSQL(query) {
   query = query.toUpperCase();
@@ -80,9 +80,42 @@ function selectSQL(query) {
           (line) => line[0] === tableNames[indexFromQuery][0]
         );
         console.log(filteredData);
+      } else {
+        //console.log(tableNames[indexFromQuery][0]);
+        //console.log(tables[indexFromQuery][0]);
+        let indexColumn = -1;
+        tables.forEach((element) => {
+          //console.log(element[1]);
+          if (element[1] === query[indexFrom + 1]) {
+            indexColumn = tables.indexOf(element) * -1;
+          }
+
+          if (
+            element[0].slice(0, 2) === tableNames[indexFromQuery][0] &&
+            element[1].toUpperCase() === query[1]
+          ) {
+            indexColumn += tables.indexOf(element);
+            //console.log(indexColumn);
+          }
+        });
+        if (indexColumn != -1) {
+          //console.log(indexColumn);
+          data.forEach((element) => {
+            if (element[0] === tableNames[indexFromQuery][0]) {
+              console.log(element[indexColumn]);
+            }
+          });
+        } else {
+          console.log("Invalid query type");
+        }
       }
+
+      /*else {
+        console.log("Perhaps another query");
+      }*/
     }
     //console.log(tableNames[indexFromQuery][0]);
   }
 }
 selectSQL(query);
+//console.log(tables);
