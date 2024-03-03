@@ -57,7 +57,90 @@ tables.forEach((element) => {
     tableNames.push([element[0].slice(0, 2), element[1]]);
   }
 });
-const query = "SELECT Codigo, Nombre FROM UBIGEO";
+const query = "SELECT * FROM DEP_ACAD";
+
+data.forEach((element) => {
+  switch (element[0]) {
+    case "01":
+      data[data.indexOf(element)] = [
+        element[0],
+        element[1],
+        element.slice(2).join(" "),
+      ];
+      break;
+    case "02":
+      let newData = [element[0], element[1]];
+      if (element[3].length > 3) {
+        newData.push(element.slice(2, 4).join(" ").trim());
+        newData.push(element.slice(4).join(" ").trim());
+      } else {
+        newData.push(element[2]);
+        newData.push(element.slice(3).join(" ").trim());
+      }
+      data[data.indexOf(element)] = newData;
+      break;
+    case "03":
+      data[data.indexOf(element)] = [
+        element[0],
+        element[1],
+        element.slice(2, element.length - 3).join(" "),
+        element[element.length - 3],
+        element[element.length - 2],
+        element[element.length - 1],
+      ];
+      break;
+    case "04":
+      data[data.indexOf(element)] = [
+        element[0],
+        element[1],
+        element.slice(2, 4).join(" "),
+        element.slice(4, element.length - 7).join(" "),
+        element[element.length - 7],
+        element[element.length - 6],
+        element[element.length - 5],
+        element[element.length - 4],
+        element[element.length - 3],
+        element[element.length - 2],
+        element[element.length - 1],
+      ];
+      break;
+    case "05":
+      data[data.indexOf(element)] = [
+        element[0],
+        element[1],
+        element.slice(2, 4).join(" "),
+        element.slice(4, element.length - 7).join(" "),
+        element[element.length - 7],
+        element[element.length - 6],
+        element[element.length - 5],
+        element[element.length - 4],
+        element[element.length - 3],
+        element[element.length - 2],
+        element[element.length - 1],
+      ];
+      break;
+    case "06":
+      break;
+    case "07":
+      data[data.indexOf(element)] = [
+        element[0],
+        element[1],
+        element.slice(2).join(" "),
+      ];
+      break;
+    case "08":
+      data[data.indexOf(element)] = [
+        element[0],
+        element[1],
+        element.slice(2).join(" "),
+      ];
+      break;
+    default:
+      console.log("Invalid query type");
+      break;
+  }
+});
+//console.log(data);
 
 function selectSQL(query) {
   query = query.toUpperCase();
