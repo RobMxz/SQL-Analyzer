@@ -4,31 +4,6 @@ const filePath = "CATALOG.DAT";
 let tables = [];
 let data = [];
 let tableNames = [];
-/*fs.readFile(filePath, "utf8", (err, data) => {
-  if (err) {
-    console.error(err);
-    return;
-  }
-
-  const lines = data.split("\n");
-
-  lines.forEach((line) => {
-    line = line.trim();
-    line = line.replace(/\s+/g, " ");
-    line = line.split(" ");
-    line.splice(2, 3, line.slice(2).join(" "));
-    if (line[0][0] != "#" && line[0] != "") {
-      tables.push(line);
-    }
-  });
-  tables.forEach((element) => {
-    if (element[0] == "01") {
-      console.log(element);
-    }
-  });
-  function select() {}
-  console.log(tables);
-});*/
 
 const dataTables = fs.readFileSync(filePath, "utf8").split("\n");
 dataTables.forEach((line) => {
@@ -57,8 +32,8 @@ tables.forEach((element) => {
     tableNames.push([element[0].slice(0, 2), element[1]]);
   }
 });
-const query = "SELECT LOWER(Simbolo, *, Codigo,Nombre) FROM MONEDAS";
-
+const query =
+  "SELECT SIMBOLO, CONCAT(NOMBRE,' ',CODIGO),   Codigo FROM MONEDAS";
 data.forEach((element) => {
   switch (element[0]) {
     case "01":
@@ -144,9 +119,37 @@ data.forEach((element) => {
 
 function selectSQL(query) {
   query = query.toUpperCase();
-  query = query.replace(", ", ",").replace(", ", ",");
+  query = query.replace(/,\s+/g, ",");
   query = query.split(" ");
+  //console.log(query.join(" "));
+  //console.log(query[1]);
   let indexFrom = query.indexOf("FROM");
+
+  //console.log(query.slice(1, indexFrom).join(" "));
+
+  let columns;
+  columns = query.slice(1, indexFrom).join(" ").split(",");
+  let parUp = -1;
+  let parClose = -1;
+  let newC = [];
+  for (let i = 0; i < columns.length; i++) {
+    if (columns[i].includes("(")) {
+      parUp = i;
+    } else {
+      if (columns[i].includes(")")) {
+        parClose = i;
+        newC.push(columns.slice(parUp, parClose + 1).join(","));
+        parUp = -1;
+        parClose = -1;
+      } else {
+        if (parUp === -1 && parClose === -1) {
+          newC.push(columns[i].trim());
+        }
+      }
+    }
+  }
+  columns = newC;
+
   if (indexFrom === -1) {
     console.log("Invalid query type");
     return;
@@ -158,69 +161,169 @@ function selectSQL(query) {
       console.log("Invalid query type");
       return;
     } else {
-      //ESTE SI VA
-      //console.log(query.slice(1, indexFrom).join("").split(","));
-      let columns;
-      columns = query.slice(1, indexFrom).join("").split(",");
-      let up = false;
-      let low = false;
-      if (query[1].slice(0, 5) == "UPPER") {
-        columns = query[1].slice(6, query[1].length - 1).split(",");
-        up = true;
-      }
-      if (query[1].slice(0, 5) == "LOWER") {
-        columns = query[1].slice(6, query[1].length - 1).split(",");
-        low = true;
-      }
-      for (const column of columns) {
-        let indexColumn = -1;
-        //ESTE TAMBIEN
-        console.log("\n", column, "\n");
-        if (column === "*") {
-          data.forEach((element) => {
-            if (element[0] === tableNames[indexFromQuery][0]) {
-              if (up) {
-                console.log(element.slice(1).join(" ").toUpperCase());
-              } else {
-                if (low) {
-                  console.log(element.slice(1).join(" ").toLowerCase());
-                } else {
-                  console.log(element.slice(1).join(" "));
-                }
-              }
-            }
-          });
-        } else {
-          tables.forEach((element) => {
-            if (element[1] === query[indexFrom + 1]) {
-              indexColumn = tables.indexOf(element) * -1;
-            }
+      for (let i = 0; i < columns.length; i++) {
+        let up = false;
+        let low = false;
 
-            if (
-              element[0].slice(0, 2) === tableNames[indexFromQuery][0] &&
-              element[1].toUpperCase() === column
-            ) {
-              indexColumn += tables.indexOf(element);
-              //console.log(indexColumn);
-            }
-          });
-          if (indexColumn != -1) {
-            //console.log(indexColumn);
+        if (!columns[i].includes("(")) {
+          let indexColumn = -1;
+          //ESTE TAMBIEN
+          console.log("\n", columns[i], "\n");
+
+          if (columns[i] === "*") {
             data.forEach((element) => {
               if (element[0] === tableNames[indexFromQuery][0]) {
                 if (up) {
-                  console.log(element[indexColumn].toUpperCase());
+                  console.log(element.slice(1).join(" ").toUpperCase());
                 } else {
                   if (low) {
-                    console.log(element[indexColumn].toLowerCase());
+                    console.log(element.slice(1).join(" ").toLowerCase());
                   } else {
-                    console.log(element[indexColumn]);
+                    console.log(element.slice(1).join(" "));
                   }
                 }
               }
             });
           } else {
-            console.log("Invalid query type");
+            tables.forEach((element) => {
+              if (element[1] === query[indexFrom + 1]) {
+                indexColumn = tables.indexOf(element) * -1;
+              }
+
+              if (
+                element[0].slice(0, 2) === tableNames[indexFromQuery][0] &&
+                element[1].toUpperCase() === columns[i]
+              ) {
+                indexColumn += tables.indexOf(element);
+                //console.log(indexColumn);
+              }
+            });
+            if (indexColumn > -1) {
+              //console.log(indexColumn);
+              data.forEach((element) => {
+                if (element[0] === tableNames[indexFromQuery][0]) {
+                  if (up) {
+                    console.log(element[indexColumn].toUpperCase());
+                  } else {
+                    if (low) {
+                      console.log(element[indexColumn].toLowerCase());
+                    } else {
+                      console.log(element[indexColumn]);
+                    }
+                  }
+                }
+              });
+            } else {
+              console.log("Invalid query type");
+            }
+          }
+          ///xdxdd/
+        } else {
+          let concat = false;
+          let finalString = "";
+          let arrayString = [];
+          if (columns[i].slice(0, 5) == "UPPER") {
+            columns[i] = columns[i].slice(6, columns[i].length - 1).split(",");
+            up = true;
+          }
+          if (columns[i].slice(0, 5) == "LOWER") {
+            columns[i] = columns[i].slice(6, columns[i].length - 1).split(",");
+            low = true;
+          }
+          if (columns[i].slice(0, 6) == "CONCAT") {
+            columns[i] = columns[i].slice(7, columns[i].length - 1).split(",");
+            concat = true;
+          }
+          for (const column of columns[i]) {
+            let indexColumn = -1;
+            let stringAc = [];
+            //ESTE TAMBIEN
+            if (!concat) {
+              console.log("\n", column, "\n");
+            }
+
+            if (column === "*") {
+              data.forEach((element) => {
+                if (element[0] === tableNames[indexFromQuery][0]) {
+                  if (up) {
+                    console.log(element.slice(1).join(" ").toUpperCase());
+                  } else {
+                    if (low) {
+                      console.log(element.slice(1).join(" ").toLowerCase());
+                    } else {
+                      console.log(element.slice(1).join(" "));
+                    }
+                  }
+                }
+              });
+            } else {
+              tables.forEach((element) => {
+                if (element[1] === query[indexFrom + 1]) {
+                  indexColumn = tables.indexOf(element) * -1;
+                }
+
+                if (
+                  element[0].slice(0, 2) === tableNames[indexFromQuery][0] &&
+                  element[1].toUpperCase() === column
+                ) {
+                  indexColumn += tables.indexOf(element);
+                  //console.log(indexColumn);
+                }
+              });
+              if (indexColumn > -1) {
+                //console.log(indexColumn);
+                data.forEach((element) => {
+                  if (element[0] === tableNames[indexFromQuery][0]) {
+                    if (up) {
+                      console.log(element[indexColumn].toUpperCase());
+                    } else {
+                      if (low) {
+                        console.log(element[indexColumn].toLowerCase());
+                      } else {
+                        if (concat) {
+                          stringAc.push(element[indexColumn]);
+                        } else {
+                          console.log(element[indexColumn]);
+                        }
+                      }
+                    }
+                  }
+                });
+              } else {
+                if (concat) {
+                  stringAc.push(column);
+                } else {
+                  console.log("Invalid query type");
+                }
+              }
+            }
+            if (concat) {
+              arrayString.push(stringAc);
+              if (columns[i].indexOf(column) === columns[i].length - 1) {
+                console.log("\n", "CONCAT", "\n");
+                let maxElementos = arrayString.reduce(
+                  (max, arr) => Math.max(max, arr.length),
+                  0
+                );
+                for (let k = 0; k < maxElementos; k++) {
+                  finalString = arrayString[0][k];
+                  for (let j = 1; j < arrayString.length; j++) {
+                    if (arrayString[j][0].includes("'")) {
+                      finalString += arrayString[j][0].slice(
+                        1,
+                        arrayString[j][0].length - 1
+                      );
+                    } else {
+                      finalString = finalString.concat(arrayString[j][k]);
+                    }
+                  }
+                  console.log(finalString);
+                }
+
+                arrayString = [];
+                concat = false;
+              }
+            }
           }
         }
       }
@@ -228,5 +331,6 @@ function selectSQL(query) {
     //console.log(tableNames[indexFromQuery][0]);
   }
 }
+
 selectSQL(query);
 //console.log(tables);
