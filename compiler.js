@@ -57,7 +57,7 @@ tables.forEach((element) => {
     tableNames.push([element[0].slice(0, 2), element[1]]);
   }
 });
-const query = "SELECT * FROM DEP_ACAD";
+const query = "SELECT LOWER(Simbolo, *, Codigo,Nombre) FROM MONEDAS";
 
 data.forEach((element) => {
   switch (element[0]) {
@@ -144,6 +144,7 @@ data.forEach((element) => {
 
 function selectSQL(query) {
   query = query.toUpperCase();
+  query = query.replace(", ", ",").replace(", ", ",");
   query = query.split(" ");
   let indexFrom = query.indexOf("FROM");
   if (indexFrom === -1) {
@@ -157,18 +158,39 @@ function selectSQL(query) {
       console.log("Invalid query type");
       return;
     } else {
-      if (query[1] === "*") {
-        //console.log(tableNames[indexFromQuery][0]);
-        const filteredData = data.filter(
-          (line) => line[0] === tableNames[indexFromQuery][0]
-        );
-        console.log(filteredData);
-      } else {
-        console.log(query.slice(1, indexFrom).join("").split(","));
-        const columns = query.slice(1, indexFrom).join("").split(",");
-        for (const column of columns) {
-          let indexColumn = -1;
-          console.log("\n", column, "\n");
+      //ESTE SI VA
+      //console.log(query.slice(1, indexFrom).join("").split(","));
+      let columns;
+      columns = query.slice(1, indexFrom).join("").split(",");
+      let up = false;
+      let low = false;
+      if (query[1].slice(0, 5) == "UPPER") {
+        columns = query[1].slice(6, query[1].length - 1).split(",");
+        up = true;
+      }
+      if (query[1].slice(0, 5) == "LOWER") {
+        columns = query[1].slice(6, query[1].length - 1).split(",");
+        low = true;
+      }
+      for (const column of columns) {
+        let indexColumn = -1;
+        //ESTE TAMBIEN
+        console.log("\n", column, "\n");
+        if (column === "*") {
+          data.forEach((element) => {
+            if (element[0] === tableNames[indexFromQuery][0]) {
+              if (up) {
+                console.log(element.slice(1).join(" ").toUpperCase());
+              } else {
+                if (low) {
+                  console.log(element.slice(1).join(" ").toLowerCase());
+                } else {
+                  console.log(element.slice(1).join(" "));
+                }
+              }
+            }
+          });
+        } else {
           tables.forEach((element) => {
             if (element[1] === query[indexFrom + 1]) {
               indexColumn = tables.indexOf(element) * -1;
@@ -186,43 +208,21 @@ function selectSQL(query) {
             //console.log(indexColumn);
             data.forEach((element) => {
               if (element[0] === tableNames[indexFromQuery][0]) {
-                console.log(element[indexColumn]);
+                if (up) {
+                  console.log(element[indexColumn].toUpperCase());
+                } else {
+                  if (low) {
+                    console.log(element[indexColumn].toLowerCase());
+                  } else {
+                    console.log(element[indexColumn]);
+                  }
+                }
               }
             });
           } else {
             console.log("Invalid query type");
           }
         }
-        /*
-        
-
-        //console.log(tableNames[indexFromQuery][0]);
-        //console.log(tables[indexFromQuery][0]);
-        let indexColumn = -1;
-        tables.forEach((element) => {
-          //console.log(element[1]);
-          if (element[1] === query[indexFrom + 1]) {
-            indexColumn = tables.indexOf(element) * -1;
-          }
-
-          if (
-            element[0].slice(0, 2) === tableNames[indexFromQuery][0] &&
-            element[1].toUpperCase() === query[1]
-          ) {
-            indexColumn += tables.indexOf(element);
-            //console.log(indexColumn);
-          }
-        });
-        if (indexColumn != -1) {
-          //console.log(indexColumn);
-          data.forEach((element) => {
-            if (element[0] === tableNames[indexFromQuery][0]) {
-              console.log(element[indexColumn]);
-            }
-          });
-        } else {
-          console.log("Invalid query type");
-        }*/
       }
     }
     //console.log(tableNames[indexFromQuery][0]);
